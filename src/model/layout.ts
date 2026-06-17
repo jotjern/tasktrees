@@ -4,7 +4,7 @@ export const COL_WIDTH = 220;
 export const ROW_HEIGHT = 56;
 export const NODE_WIDTH = 180;
 export const NODE_HEIGHT = 40;
-export const PADDING = 40;
+export const PADDING = 88;
 
 export interface NodePosition {
   x: number;
