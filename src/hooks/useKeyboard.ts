@@ -90,6 +90,18 @@ export function useKeyboard({ tasks, state, layout }: Args): void {
       if (isEditable(document.activeElement)) return;
       if (tasksRef.current.editingId !== null) return;
 
+      if (
+        (e.key === 'A' || e.key === 'a') &&
+        e.shiftKey &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey
+      ) {
+        tasksRef.current.archiveCompleted();
+        e.preventDefault();
+        return;
+      }
+
       const dir = detectDirection(e);
       if (dir) {
         const hasModifier = e.metaKey || e.ctrlKey || e.altKey || e.shiftKey;

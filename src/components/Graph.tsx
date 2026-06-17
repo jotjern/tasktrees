@@ -48,7 +48,7 @@ export function Graph({ state, layout, tasks, scrollRef }: Props) {
       let total = 0;
       for (const cid of children) {
         const child = state.tasks[cid];
-        if (!child || child.softDeleted) continue;
+        if (!child || child.softDeleted || child.archived) continue;
         total += 1;
         if (child.completed) done += 1;
         const sub = visit(cid);

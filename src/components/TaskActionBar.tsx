@@ -92,12 +92,12 @@ export function TaskActionBar({
             <path d="M4 20h4L19 9l-4-4L4 16z" />
           </svg>
         </button>
-        {task.softDeleted ? (
+        {task.softDeleted || task.archived ? (
           <button
             className="task-action-btn"
             onClick={stop(onRestore)}
             aria-label="Restore"
-            title="Restore"
+            title={task.archived ? 'Unarchive' : 'Restore'}
           >
             <svg
               viewBox="0 0 24 24"

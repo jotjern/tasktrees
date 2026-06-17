@@ -16,6 +16,7 @@ const SHORTCUTS: [string, string][] = [
   ['⌘ / Ctrl + Shift + Enter', 'New root task'],
   ['Backspace', 'Soft delete (again: hard delete)'],
   ['Shift + Backspace', 'Restore soft-deleted task'],
+  ['Shift + A', 'Archive all completed tasks'],
 ];
 
 const STATUS_LABELS: Record<string, string> = {
@@ -32,7 +33,15 @@ export default function App() {
   const workspaces = useWorkspaces();
   const tasks = useTasks(workspaces.activeWorkspace.id);
   const sync = useCloudSync(tasks, workspaces);
-  const layout = useMemo(() => computeLayout(tasks.state), [tasks.state]);
+  const [showArchived, setShowArchived] = useState(false);
+  const layout = useMemo(
+    () => computeLayout(tasks.state, { includeArchived: showArchived }),
+    [tasks.state, showArchived],
+  );
+  const archivedCount = useMemo(
+    () => Object.values(tasks.state.tasks).filter((t) => t.archived).length,
+    [tasks.state.tasks],
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const [helpHidden, setHelpHidden] = useState<boolean>(
     () => localStorage.getItem(HELP_HIDDEN_KEY) === '1',
@@ -79,6 +88,26 @@ export default function App() {
           >
             <span className={`storage-dot storage-dot--${sync.status}`} />
             GitHub Gist · {STATUS_LABELS[sync.status]}
+          </button>
+        )}
+      </div>
+      <div className="top-left-stack">
+        <button
+          className="toolbar-button"
+          onClick={tasks.archiveCompleted}
+          title="Archive all completed tasks (Shift + A)"
+        >
+          Archive completed
+        </button>
+        {archivedCount > 0 && (
+          <button
+            className={`toolbar-button toolbar-button--toggle${
+              showArchived ? ' toolbar-button--active' : ''
+            }`}
+            onClick={() => setShowArchived((v) => !v)}
+            title={showArchived ? 'Hide archived tasks' : 'Show archived tasks'}
+          >
+            {showArchived ? 'Hide' : 'Show'} archived · {archivedCount}
           </button>
         )}
       </div>

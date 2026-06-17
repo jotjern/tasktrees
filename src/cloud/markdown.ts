@@ -34,7 +34,8 @@ function encodeTaskLines(state: AppState): string[] {
     const indent = '  '.repeat(depth);
     const box = task.completed ? '[x]' : '[ ]';
     const title = task.softDeleted ? `~~${task.title}~~` : task.title;
-    lines.push(`${indent}- ${box} ${title} <!-- id:${task.id} ts:${task.createdAt} -->`);
+    const arch = task.archived ? ' arch:1' : '';
+    lines.push(`${indent}- ${box} ${title} <!-- id:${task.id} ts:${task.createdAt}${arch} -->`);
     const children = state.childOrder[id] ?? [];
     for (const childId of children) walk(childId, depth + 1);
   };
@@ -48,9 +49,10 @@ interface ParsedLine {
   title: string;
   id: TaskId;
   createdAt: number;
+  archived: boolean;
 }
 
-const LINE_RE = /^(\s*)-\s*\[([ xX])\]\s*(.*?)(?:\s*<!--\s*id:([^\s]+)(?:\s+ts:(\d+))?\s*-->)?\s*$/;
+const LINE_RE = /^(\s*)-\s*\[([ xX])\]\s*(.*?)(?:\s*<!--\s*id:([^\s]+)(?:\s+ts:(\d+))?(?:\s+arch:(\d))?\s*-->)?\s*$/;
 const WORKSPACE_HEADING_RE = /^##\s*(.*?)(?:\s*<!--\s*workspace:([^\s]+)\s*-->)?\s*$/;
 const UPDATED_RE = /^<!--\s*updated:(\d+)\s*-->/m;
 
@@ -118,7 +120,8 @@ function decodeTaskLines(lines: string[]): AppState {
     if (softDeleted) title = title.replace(/^~~/, '').replace(/~~$/, '');
     const id = m[4] ?? newId();
     const createdAt = m[5] ? Number(m[5]) : Date.now();
-    parsed.push({ depth, completed, title, id, createdAt });
+    const archived = m[6] === '1';
+    parsed.push({ depth, completed, title, id, createdAt, archived });
 
     const task: Task = {
       id,
@@ -126,6 +129,7 @@ function decodeTaskLines(lines: string[]): AppState {
       parentId: null,
       completed,
       softDeleted,
+      archived,
       createdAt,
     };
     state.tasks[id] = task;

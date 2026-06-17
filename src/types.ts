@@ -6,6 +6,7 @@ export interface Task {
   parentId: TaskId | null;
   completed: boolean;
   softDeleted: boolean;
+  archived: boolean;
   createdAt: number;
 }
 

@@ -57,8 +57,8 @@ export function TaskNode({
     height: NODE_HEIGHT,
     background: effectiveColor,
     color: textColor,
-    opacity: task.softDeleted ? 0.45 : 1,
-    filter: task.softDeleted ? 'grayscale(0.8)' : undefined,
+    opacity: task.softDeleted ? 0.45 : task.archived ? 0.55 : 1,
+    filter: task.softDeleted || task.archived ? 'grayscale(0.8)' : undefined,
     ['--progress' as unknown as keyof React.CSSProperties]: `${progress * 100}%`,
   };
 
@@ -69,6 +69,7 @@ export function TaskNode({
     task.completed ? 'task-node--done' : '',
     hasDescendants && !task.completed ? 'task-node--has-progress' : '',
     allDone ? 'task-node--ready' : '',
+    task.archived ? 'task-node--archived' : '',
     framed ? 'task-node--framed' : '',
   ]
     .filter(Boolean)

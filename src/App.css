@@ -113,6 +113,54 @@ body {
   z-index: 101;
 }
 
+.top-left-stack {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  z-index: 101;
+}
+
+.toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 15px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.toolbar-button:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.toolbar-button--toggle {
+  color: #6b7280;
+}
+
+.toolbar-button--active {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+}
+
+.toolbar-button--active:hover {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
 .workspace-selector {
   position: relative;
 }
@@ -513,6 +561,10 @@ body {
 
 .task-node--framed.task-node--has-progress::before {
   border-top-left-radius: 0;
+}
+
+.task-node--archived {
+  border: 1px dashed rgba(55, 65, 81, 0.5);
 }
 
 .task-node--root {

@@ -14,6 +14,7 @@ export interface UseTasks {
   toggleComplete: (id: TaskId) => void;
   backspace: (id: TaskId) => void;
   restore: (id: TaskId) => void;
+  archiveCompleted: () => void;
   newSubtask: (parentId: TaskId | null) => void;
   newRoot: () => void;
   replaceState: (next: AppState) => void;
@@ -51,7 +52,7 @@ export function useTasks(workspaceId: string): UseTasks {
     const current = new Set<TaskId>();
     for (const id of state.rootOrder) {
       const task = state.tasks[id];
-      if (task?.completed && !task.softDeleted) current.add(id);
+      if (task?.completed && !task.softDeleted && !task.archived) current.add(id);
     }
     if (prevCompletedRoots.current !== null) {
       for (const id of current) {
@@ -89,7 +90,15 @@ export function useTasks(workspaceId: string): UseTasks {
   }, []);
 
   const restore = useCallback((id: TaskId) => {
-    setState((s) => tree.restore(s, id));
+    setState((s) => {
+      const task = s.tasks[id];
+      if (task?.archived) return tree.unarchive(s, id);
+      return tree.restore(s, id);
+    });
+  }, []);
+
+  const archiveCompleted = useCallback(() => {
+    setState((s) => tree.archiveCompleted(s));
   }, []);
 
   const newSubtask = useCallback((parentId: TaskId | null) => {
@@ -127,6 +136,7 @@ export function useTasks(workspaceId: string): UseTasks {
     toggleComplete,
     backspace,
     restore,
+    archiveCompleted,
     newSubtask,
     newRoot,
     replaceState,

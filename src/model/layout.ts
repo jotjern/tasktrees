@@ -20,15 +20,27 @@ export interface LayoutResult {
   maxCol: number;
 }
 
-export function computeLayout(state: AppState): LayoutResult {
+export interface LayoutOptions {
+  includeArchived?: boolean;
+}
+
+export function computeLayout(state: AppState, options: LayoutOptions = {}): LayoutResult {
+  const { includeArchived = false } = options;
   const positions: Record<TaskId, NodePosition> = {};
   const depthFromLeaf: Record<TaskId, number> = {};
+
+  const isVisible = (id: TaskId): boolean => {
+    const task = state.tasks[id];
+    return !!task && (includeArchived || !task.archived);
+  };
+  const visibleChildren = (id: TaskId): TaskId[] =>
+    (state.childOrder[id] ?? []).filter(isVisible);
 
   const computeDepth = (id: TaskId, seen: Set<TaskId>): number => {
     if (depthFromLeaf[id] !== undefined) return depthFromLeaf[id];
     if (seen.has(id)) return 0;
     seen.add(id);
-    const children = state.childOrder[id] ?? [];
+    const children = visibleChildren(id);
     if (children.length === 0) {
       depthFromLeaf[id] = 0;
       return 0;
@@ -42,7 +54,9 @@ export function computeLayout(state: AppState): LayoutResult {
     return max;
   };
 
-  for (const id of Object.keys(state.tasks)) computeDepth(id, new Set());
+  for (const id of Object.keys(state.tasks)) {
+    if (isVisible(id)) computeDepth(id, new Set());
+  }
 
   let maxCol = 0;
   for (const id of Object.keys(depthFromLeaf)) {
@@ -53,7 +67,7 @@ export function computeLayout(state: AppState): LayoutResult {
   const rowFor: Record<TaskId, number> = {};
 
   const visit = (id: TaskId): number => {
-    const children = state.childOrder[id] ?? [];
+    const children = visibleChildren(id);
     if (children.length === 0) {
       const row = rowCursor++;
       rowFor[id] = row;
@@ -65,9 +79,12 @@ export function computeLayout(state: AppState): LayoutResult {
     return avg;
   };
 
-  for (const rootId of state.rootOrder) visit(rootId);
+  for (const rootId of state.rootOrder) {
+    if (isVisible(rootId)) visit(rootId);
+  }
 
   for (const id of Object.keys(state.tasks)) {
+    if (!isVisible(id)) continue;
     const col = depthFromLeaf[id];
     const row = rowFor[id] ?? 0;
     positions[id] = {
